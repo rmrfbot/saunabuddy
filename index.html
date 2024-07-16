@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sauna Temperature Voting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .vote-form {
+            margin-bottom: 20px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sauna Temperature Voting</h1>
+        <form class="vote-form" id="voteForm">
+            <label for="temperature">Enter the temperature you want to vote for (between 160 and 212 Fahrenheit):</label>
+            <input type="number" id="temperature" name="temperature" min="160" max="212" required>
+            <button type="submit">Submit Vote</button>
+        </form>
+        <div class="results" id="results">
+            <p id="averageTemp">Average Temperature: N/A</p>
+            <p id="recentVotes">Percentage of votes in the last 3 hours: N/A</p>
+        </div>
+    </div>
+
+    <script>
+        const votes = [];
+        const MAX_USERS = 10;
+        const THREE_HOURS = 3 * 60 * 60 * 1000;
+
+        document.getElementById('voteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const temp = parseInt(document.getElementById('temperature').value);
+            const voteTime = new Date().getTime();
+
+            if (votes.length < MAX_USERS) {
+                votes.push({ temperature: temp, voteTime: voteTime });
+                updateResults();
+            } else {
+                alert('Maximum number of votes reached.');
+            }
+        });
+
+        function updateResults() {
+            const currentTime = new Date().getTime();
+            const recentVotes = votes.filter(vote => currentTime - vote.voteTime <= THREE_HOURS);
+            const averageTemp = votes.reduce((sum, vote) => sum + vote.temperature, 0) / votes.length;
+            const recentVotesPercentage = (recentVotes.length / votes.length) * 100;
+
+            document.getElementById('averageTemp').innerText = `Average Temperature: ${averageTemp.toFixed(2)}°F`;
+            document.getElementById('recentVotes').innerText = `Percentage of votes in the last 3 hours: ${recentVotesPercentage.toFixed(2)}%`;
+        }
+    </script>
+</body>
+</html>
