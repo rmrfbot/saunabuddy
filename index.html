@@ -3,65 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sauna Temperature Voting</title>
+    <title>Sauna Buddy</title>
     <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #3b82f6);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .container {
-            max-width: 600px;
-            margin: auto;
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
         }
-        .vote-form {
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 24px;
+        }
+
+        .temp-display {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 24px 16px;
+            margin-bottom: 28px;
+        }
+
+        .temp-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.75;
+            margin-bottom: 6px;
+        }
+
+        .current-temp {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #ffffff;
+        }
+
+        .temp-status {
+            font-size: 0.78rem;
+            margin-top: 10px;
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .vote-section-label {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 8px;
             margin-bottom: 20px;
         }
-        .results {
-            margin-top: 20px;
+
+        .btn-circle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .btn-circle:active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.95);
+        }
+
+        .selected-val {
+            font-size: 2.2rem;
+            font-weight: 700;
+            min-width: 100px;
+        }
+
+        .btn-submit {
+            background: #2563eb;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+            background: #1d4ed8;
+        }
+
+        .message {
+            margin-top: 14px;
+            font-size: 0.88rem;
+            color: #4ade80;
+            min-height: 20px;
+            font-weight: 600;
+        }
+
+        .debug-section {
+            margin-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 16px;
+        }
+
+        .btn-small {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            margin: 2px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Sauna Temperature Voting</h1>
-        <form class="vote-form" id="voteForm">
-            <label for="temperature">Enter the temperature you want to vote for (between 160 and 212 Fahrenheit):</label>
-            <input type="number" id="temperature" name="temperature" min="160" max="212" required>
-            <button type="submit">Submit Vote</button>
-        </form>
-        <div class="results" id="results">
-            <p id="averageTemp">Average Temperature: N/A</p>
-            <p id="recentVotes">Percentage of votes in the last 3 hours: N/A</p>
+
+    <div class="card">
+        <h1>Sauna Buddy</h1>
+        <p class="subtitle">Vote to set the gym sauna level</p>
+
+        <div class="temp-display">
+            <div class="temp-label">Target Temperature</div>
+            <div class="current-temp" id="targetTemp">--°F</div>
+            <div class="temp-status" id="tempStatus">Calculating...</div>
+        </div>
+
+        <div class="vote-section-label">Select Your Preferred Temp:</div>
+        <div class="selector">
+            <button class="btn-circle" onclick="adjustVote(-5)">-</button>
+            <div class="selected-val" id="voteVal">175°F</div>
+            <button class="btn-circle" onclick="adjustVote(5)">+</button>
+        </div>
+
+        <button class="btn-submit" onclick="submitVote()">Vote Now</button>
+        <div class="message" id="msg"></div>
+
+        <!-- Testing tools for 2-hour window logic -->
+        <div class="debug-section">
+            <button class="btn-small" onclick="addOldTestVote()">+ Test Vote (>2h Old)</button>
+            <button class="btn-small" onclick="clearData()">Reset Votes</button>
         </div>
     </div>
 
     <script>
-        const votes = [];
-        const MAX_USERS = 10;
-        const THREE_HOURS = 3 * 60 * 60 * 1000;
+        const MIN_TEMP = 140;
+        const MAX_TEMP = 210;
+        const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+        let currentVoteSelection = 175;
 
-        document.getElementById('voteForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const temp = parseInt(document.getElementById('temperature').value);
-            const voteTime = new Date().getTime();
-
-            if (votes.length < MAX_USERS) {
-                votes.push({ temperature: temp, voteTime: voteTime });
-                updateResults();
-            } else {
-                alert('Maximum number of votes reached.');
+        // Creates a unique identifier for this browser/device
+        function getUserId() {
+            let uid = localStorage.getItem('saunabuddy_user_id');
+            if (!uid) {
+                uid = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('saunabuddy_user_id', uid);
             }
-        });
-
-        function updateResults() {
-            const currentTime = new Date().getTime();
-            const recentVotes = votes.filter(vote => currentTime - vote.voteTime <= THREE_HOURS);
-            const averageTemp = votes.reduce((sum, vote) => sum + vote.temperature, 0) / votes.length;
-            const recentVotesPercentage = (recentVotes.length / votes.length) * 100;
-
-            document.getElementById('averageTemp').innerText = `Average Temperature: ${averageTemp.toFixed(2)}°F`;
-            document.getElementById('recentVotes').innerText = `Percentage of votes in the last 3 hours: ${recentVotesPercentage.toFixed(2)}%`;
+            return uid;
         }
+
+        function adjustVote(amount) {
+            currentVoteSelection += amount;
+            if (currentVoteSelection < MIN_TEMP) currentVoteSelection = MIN_TEMP;
+            if (currentVoteSelection > MAX_TEMP) currentVoteSelection = MAX_TEMP;
+            document.getElementById('voteVal').innerText = currentVoteSelection + '°F';
+        }
+
+        function calculateAverage() {
+            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
+            const now = Date.now();
+
+            // 1. Filter votes from the last 2 hours
+            const recentVotes = votes.filter(v => (now - v.timestamp) <= TWO_HOURS_MS);
+
+            if (recentVotes.length > 0) {
+                const sum = recentVotes.reduce((acc, v) => acc + v.temp, 0);
+                const avg = Math.round(sum / recentVotes.length);
+                return {
+                    temp: avg,
+                    status: `Avg of ${recentVotes.length} vote(s) in last 2 hours`
+                };
+            }
+
+            // 2. Fallback: Average of all-time unique voter choices
+            if (votes.length > 0) {
+                const uniqueUserVotes = {};
+                votes.forEach(v => {
+                    uniqueUserVotes[v.userId] = v.temp; // Keeps latest vote per unique device
+                });
+                const uniqueVals = Object.values(uniqueUserVotes);
+                const sum = uniqueVals.reduce((acc, temp) => acc + temp, 0);
+                const avg = Math.round(sum / uniqueVals.length);
+                return {
+                    temp: avg,
+                    status: `Fallback: Avg of ${uniqueVals.length} all-time unique voter(s)`
+                };
+            }
+
+            // Default initial state if no data exists
+            return {
+                temp: 175,
+                status: 'Default temperature (No votes yet)'
+            };
+        }
+
+        function updateUI() {
+            const result = calculateAverage();
+            document.getElementById('targetTemp').innerText = result.temp + '°F';
+            document.getElementById('tempStatus').innerText = result.status;
+        }
+
+        function submitVote() {
+            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
+            const userId = getUserId();
+            
+            votes.push({
+                userId: userId,
+                temp: currentVoteSelection,
+                timestamp: Date.now()
+            });
+
+            localStorage.setItem('saunabuddy_votes', JSON.stringify(votes));
+            
+            const msg = document.getElementById('msg');
+            msg.innerText = `Vote for ${currentVoteSelection}°F recorded!`;
+            setTimeout(() => { msg.innerText = ''; }, 3000);
+
+            updateUI();
+        }
+
+        function clearData() {
+            localStorage.removeItem('saunabuddy_votes');
+            updateUI();
+            const msg = document.getElementById('msg');
+            msg.innerText = 'All data reset';
+            setTimeout(() => { msg.innerText = ''; }, 2000);
+        }
+
+        function addOldTestVote() {
+            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
+            votes.push({
+                userId: 'test_user_' + Math.random().toString(36).substr(2, 5),
+                temp: 150,
+                timestamp: Date.now() - (3 * 60 * 60 * 1000) // 3 hours ago
+            });
+            localStorage.setItem('saunabuddy_votes', JSON.stringify(votes));
+            updateUI();
+        }
+
+        // Run on page load
+        updateUI();
     </script>
 </body>
 </html>
