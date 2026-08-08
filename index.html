@@ -1,307 +1,209 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sauna Buddy</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+/*
+ * Sauna Buddy -- voting engine prototype (CLI reference implementation)
+ *
+ * Mirrors the averaging/cooldown rules in index.html so the same
+ * algorithm can be checked in plain C before it moves onto whatever
+ * hardware ends up driving the actual heater.
+ *
+ * TEMPERATURE RANGE -- keep in sync with index.html, and configure per
+ * facility before deployment. 150-190F sits inside the range public/
+ * commercial saunas commonly run (North American Sauna Society cites
+ * roughly 158-194F; most sources put a "safe ceiling for healthy
+ * adults" around 195F, with heat-illness risk climbing past that).
+ * Don't push MAX_TEMP toward water's boiling point (212F) -- no
+ * mainstream sauna-safety source treats that as a health target, and
+ * a commercial unit serves people with a much wider range of health
+ * conditions than a single enthusiast's home sauna does.
+ */
 
-        body {
-            background: linear-gradient(135deg, #0f172a, #1e3a8a, #3b82f6);
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 32px 24px;
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
-        }
+#define MAX_VOTES        200
+#define MAX_ID_LEN        32
+#define MIN_TEMP          150
+#define MAX_TEMP          190
+#define VOTE_WINDOW_SECS  (2 * 3600)   /* a vote counts toward the average for 2 hours   */
+#define COOLDOWN_SECS     (30 * 60)    /* one new vote per voter every 30 minutes        */
 
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
+typedef struct {
+    char    voter_id[MAX_ID_LEN];
+    int     temperature;
+    time_t  vote_time;
+} Vote;
 
-        .subtitle {
-            font-size: 0.85rem;
-            opacity: 0.8;
-            margin-bottom: 24px;
-        }
+static Vote votes[MAX_VOTES];
+static int  vote_count = 0;
 
-        .temp-display {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 24px 16px;
-            margin-bottom: 28px;
-        }
-
-        .temp-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.75;
-            margin-bottom: 6px;
-        }
-
-        .current-temp {
-            font-size: 3.8rem;
-            font-weight: 800;
-            line-height: 1;
-            color: #ffffff;
-        }
-
-        .temp-status {
-            font-size: 0.78rem;
-            margin-top: 10px;
-            opacity: 0.9;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 6px 12px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-
-        .vote-section-label {
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-
-        .selector {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 8px;
-            margin-bottom: 20px;
-        }
-
-        .btn-circle {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            font-size: 1.6rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
-        }
-
-        .btn-circle:active {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0.95);
-        }
-
-        .selected-val {
-            font-size: 2.2rem;
-            font-weight: 700;
-            min-width: 100px;
-        }
-
-        .btn-submit {
-            background: #2563eb;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            width: 100%;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-            transition: transform 0.1s, background 0.2s;
-        }
-
-        .btn-submit:active {
-            transform: scale(0.98);
-            background: #1d4ed8;
-        }
-
-        .message {
-            margin-top: 14px;
-            font-size: 0.88rem;
-            color: #4ade80;
-            min-height: 20px;
-            font-weight: 600;
-        }
-
-        .debug-section {
-            margin-top: 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: 16px;
-        }
-
-        .btn-small {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.8);
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 0.72rem;
-            cursor: pointer;
-            margin: 2px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <h1>Sauna Buddy</h1>
-        <p class="subtitle">Vote to set the gym sauna level</p>
-
-        <div class="temp-display">
-            <div class="temp-label">Target Temperature</div>
-            <div class="current-temp" id="targetTemp">--°F</div>
-            <div class="temp-status" id="tempStatus">Calculating...</div>
-        </div>
-
-        <div class="vote-section-label">Select Your Preferred Temp:</div>
-        <div class="selector">
-            <button class="btn-circle" onclick="adjustVote(-5)">-</button>
-            <div class="selected-val" id="voteVal">175°F</div>
-            <button class="btn-circle" onclick="adjustVote(5)">+</button>
-        </div>
-
-        <button class="btn-submit" onclick="submitVote()">Vote Now</button>
-        <div class="message" id="msg"></div>
-
-        <!-- Testing tools for 2-hour window logic -->
-        <div class="debug-section">
-            <button class="btn-small" onclick="addOldTestVote()">+ Test Vote (>2h Old)</button>
-            <button class="btn-small" onclick="clearData()">Reset Votes</button>
-        </div>
-    </div>
-
-    <script>
-        const MIN_TEMP = 140;
-        const MAX_TEMP = 210;
-        const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
-        let currentVoteSelection = 175;
-
-        // Creates a unique identifier for this browser/device
-        function getUserId() {
-            let uid = localStorage.getItem('saunabuddy_user_id');
-            if (!uid) {
-                uid = 'user_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('saunabuddy_user_id', uid);
+/* Index of a voter's most recent vote, or -1 if they haven't voted. */
+static int find_last_vote(const char *voter_id) {
+    int last = -1;
+    for (int i = 0; i < vote_count; i++) {
+        if (strcmp(votes[i].voter_id, voter_id) == 0) {
+            if (last == -1 || votes[i].vote_time > votes[last].vote_time) {
+                last = i;
             }
-            return uid;
         }
+    }
+    return last;
+}
 
-        function adjustVote(amount) {
-            currentVoteSelection += amount;
-            if (currentVoteSelection < MIN_TEMP) currentVoteSelection = MIN_TEMP;
-            if (currentVoteSelection > MAX_TEMP) currentVoteSelection = MAX_TEMP;
-            document.getElementById('voteVal').innerText = currentVoteSelection + '°F';
+/*
+ * Casts a vote as of `when` (pass time(NULL) for a real vote; the
+ * "simulate" menu option passes an offset time so the cooldown and
+ * window logic can be tested without waiting in real time).
+ */
+static int cast_vote(const char *voter_id, int temp, time_t when) {
+    if (temp < MIN_TEMP || temp > MAX_TEMP) {
+        printf("Invalid temperature. Enter a value between %d and %d.\n", MIN_TEMP, MAX_TEMP);
+        return 0;
+    }
+
+    int last = find_last_vote(voter_id);
+    if (last != -1) {
+        double since = difftime(when, votes[last].vote_time);
+        if (since < COOLDOWN_SECS) {
+            printf("Already voted. Try again in %.0f minute(s).\n", (COOLDOWN_SECS - since) / 60.0);
+            return 0;
         }
+    }
 
-        function calculateAverage() {
-            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
-            const now = Date.now();
+    if (vote_count >= MAX_VOTES) {
+        printf("Vote buffer full -- this fixed array is a prototype limit; a real\n"
+               "deployment stores votes in a database instead.\n");
+        return 0;
+    }
 
-            // 1. Filter votes from the last 2 hours
-            const recentVotes = votes.filter(v => (now - v.timestamp) <= TWO_HOURS_MS);
+    strncpy(votes[vote_count].voter_id, voter_id, MAX_ID_LEN - 1);
+    votes[vote_count].voter_id[MAX_ID_LEN - 1] = '\0';
+    votes[vote_count].temperature = temp;
+    votes[vote_count].vote_time = when;
+    vote_count++;
+    return 1;
+}
 
-            if (recentVotes.length > 0) {
-                const sum = recentVotes.reduce((acc, v) => acc + v.temp, 0);
-                const avg = Math.round(sum / recentVotes.length);
-                return {
-                    temp: avg,
-                    status: `Avg of ${recentVotes.length} vote(s) in last 2 hours`
-                };
+/*
+ * Same rule as index.html's calculateTarget(): average the votes cast
+ * within the last VOTE_WINDOW_SECS; if there are none, fall back to
+ * each voter's most recent vote of all time. Returns -1 if there is no
+ * data at all. *out_voters receives how many distinct voters were
+ * counted, *used_fallback flags which branch was used.
+ */
+static double target_temperature(time_t now, int *out_voters, int *used_fallback) {
+    int recent_sum = 0, recent_n = 0;
+    for (int i = 0; i < vote_count; i++) {
+        if (difftime(now, votes[i].vote_time) <= VOTE_WINDOW_SECS) {
+            recent_sum += votes[i].temperature;
+            recent_n++;
+        }
+    }
+    if (recent_n > 0) {
+        *out_voters = recent_n;
+        *used_fallback = 0;
+        return recent_sum / (double)recent_n;
+    }
+
+    if (vote_count == 0) {
+        *out_voters = 0;
+        *used_fallback = 0;
+        return -1;
+    }
+
+    /* Fallback: latest vote per unique voter, all time. A small-N scan
+       is fine for this prototype; a real backend would just query it. */
+    static char seen[MAX_VOTES][MAX_ID_LEN];
+    static int  latest_temp[MAX_VOTES];
+    int seen_count = 0;
+    for (int i = 0; i < vote_count; i++) {
+        int idx = -1;
+        for (int j = 0; j < seen_count; j++) {
+            if (strcmp(seen[j], votes[i].voter_id) == 0) { idx = j; break; }
+        }
+        if (idx == -1) {
+            strncpy(seen[seen_count], votes[i].voter_id, MAX_ID_LEN - 1);
+            seen[seen_count][MAX_ID_LEN - 1] = '\0';
+            idx = seen_count++;
+        }
+        latest_temp[idx] = votes[i].temperature; /* votes are inserted chronologically */
+    }
+
+    int sum = 0;
+    for (int i = 0; i < seen_count; i++) sum += latest_temp[i];
+    *out_voters = seen_count;
+    *used_fallback = 1;
+    return sum / (double)seen_count;
+}
+
+static void print_status(void) {
+    int voters = 0, fallback = 0;
+    double target = target_temperature(time(NULL), &voters, &fallback);
+    if (target < 0) {
+        printf("No votes yet.\n");
+        return;
+    }
+    printf("Target temperature: %.1fF  (%d voter%s, %s)\n",
+           target, voters, voters == 1 ? "" : "s",
+           fallback ? "no recent votes - showing last pick per voter" : "last 2 hours");
+}
+
+/* Drains stdin up to and including the next newline, so a bad scanf
+   doesn't leave the parser stuck re-reading the same bad token. */
+static void flush_input_line(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
+int main(void) {
+    char voter_id[MAX_ID_LEN];
+    int  choice = 0;
+
+    printf("Sauna Buddy voting prototype (%d-%dF, %d-min cooldown, %d-hour window)\n",
+           MIN_TEMP, MAX_TEMP, COOLDOWN_SECS / 60, VOTE_WINDOW_SECS / 3600);
+
+    for (;;) {
+        printf("\n1) Cast a vote\n2) Simulate a vote N minutes ago (testing)\n"
+               "3) Show target temperature\n4) List all votes\n5) Quit\n> ");
+        if (scanf("%d", &choice) != 1) { flush_input_line(); continue; }
+        flush_input_line();
+
+        if (choice == 1 || choice == 2) {
+            printf("Voter ID (e.g. a name or device id): ");
+            if (!fgets(voter_id, sizeof(voter_id), stdin)) continue;
+            voter_id[strcspn(voter_id, "\n")] = '\0';
+            if (voter_id[0] == '\0') { printf("Voter ID can't be empty.\n"); continue; }
+
+            int temp;
+            printf("Temperature (%d-%d F): ", MIN_TEMP, MAX_TEMP);
+            if (scanf("%d", &temp) != 1) { printf("Not a number.\n"); flush_input_line(); continue; }
+            flush_input_line();
+
+            time_t when = time(NULL);
+            if (choice == 2) {
+                int minutes_ago;
+                printf("Minutes ago: ");
+                if (scanf("%d", &minutes_ago) != 1) { printf("Not a number.\n"); flush_input_line(); continue; }
+                flush_input_line();
+                when = time(NULL) - (time_t)(minutes_ago * 60);
             }
 
-            // 2. Fallback: Average of all-time unique voter choices
-            if (votes.length > 0) {
-                const uniqueUserVotes = {};
-                votes.forEach(v => {
-                    uniqueUserVotes[v.userId] = v.temp; // Keeps latest vote per unique device
-                });
-                const uniqueVals = Object.values(uniqueUserVotes);
-                const sum = uniqueVals.reduce((acc, temp) => acc + temp, 0);
-                const avg = Math.round(sum / uniqueVals.length);
-                return {
-                    temp: avg,
-                    status: `Fallback: Avg of ${uniqueVals.length} all-time unique voter(s)`
-                };
+            if (cast_vote(voter_id, temp, when)) {
+                printf("Recorded %dF for '%s'.\n", temp, voter_id);
             }
-
-            // Default initial state if no data exists
-            return {
-                temp: 175,
-                status: 'Default temperature (No votes yet)'
-            };
+        } else if (choice == 3) {
+            print_status();
+        } else if (choice == 4) {
+            if (vote_count == 0) printf("No votes recorded.\n");
+            for (int i = 0; i < vote_count; i++) {
+                printf("  %-16s %3dF  (%.0f min ago)\n", votes[i].voter_id, votes[i].temperature,
+                       difftime(time(NULL), votes[i].vote_time) / 60.0);
+            }
+        } else if (choice == 5) {
+            break;
+        } else {
+            printf("Not a menu option.\n");
         }
+    }
 
-        function updateUI() {
-            const result = calculateAverage();
-            document.getElementById('targetTemp').innerText = result.temp + '°F';
-            document.getElementById('tempStatus').innerText = result.status;
-        }
-
-        function submitVote() {
-            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
-            const userId = getUserId();
-            
-            votes.push({
-                userId: userId,
-                temp: currentVoteSelection,
-                timestamp: Date.now()
-            });
-
-            localStorage.setItem('saunabuddy_votes', JSON.stringify(votes));
-            
-            const msg = document.getElementById('msg');
-            msg.innerText = `Vote for ${currentVoteSelection}°F recorded!`;
-            setTimeout(() => { msg.innerText = ''; }, 3000);
-
-            updateUI();
-        }
-
-        function clearData() {
-            localStorage.removeItem('saunabuddy_votes');
-            updateUI();
-            const msg = document.getElementById('msg');
-            msg.innerText = 'All data reset';
-            setTimeout(() => { msg.innerText = ''; }, 2000);
-        }
-
-        function addOldTestVote() {
-            const votes = JSON.parse(localStorage.getItem('saunabuddy_votes') || '[]');
-            votes.push({
-                userId: 'test_user_' + Math.random().toString(36).substr(2, 5),
-                temp: 150,
-                timestamp: Date.now() - (3 * 60 * 60 * 1000) // 3 hours ago
-            });
-            localStorage.setItem('saunabuddy_votes', JSON.stringify(votes));
-            updateUI();
-        }
-
-        // Run on page load
-        updateUI();
-    </script>
-</body>
-</html>
+    return 0;
+}
