@@ -1,2 +1,1 @@
-# saunabuddy
-an app that allows plublic sauna users to vote on a temperature and use a thermostat connected to send the average to update the temperature
+A hardware/software solution for deciding on a temperature for public saunas by voting through your phone browser or using an app.
