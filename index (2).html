@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tyler Lacy — Electrical Engineering / Systems Engineering Lead</title>
+<meta name="description" content="Tyler Lacy — Electrical Engineering student, U.S. Army veteran, and NASA Lunabotics systems engineering lead. Resume and project portfolio.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230A1511'/%3E%3Ccircle cx='9' cy='16' r='2.6' fill='%23C9A24B'/%3E%3Cline x1='9' y1='16' x2='23' y2='16' stroke='%23C9A24B' stroke-width='2'/%3E%3Ccircle cx='23' cy='16' r='2.6' fill='%23FFB627'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a1511;
+    --bg-panel:#0e1c16;
+    --line:#213328;
+    --line-soft:#182821;
+    --copper:#c9a24b;
+    --copper-dim:#7d652f;
+    --amber:#ffb627;
+    --text:#eceae0;
+    --text-muted:#93a89a;
+    --text-dim:#5c6b62;
+    --radius:3px;
+    --content-w:760px;
+    --gutter-w:34px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,162,75,0.07), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', -apple-system, sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:var(--copper);}
+  a:focus-visible, button:focus-visible, .navlink:focus-visible{
+    outline:2px solid var(--amber);
+    outline-offset:3px;
+  }
+
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- top nav ---------- */
+  .topnav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,21,17,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topnav-inner{
+    max-width:calc(var(--content-w) + var(--gutter-w) + 48px);
+    margin:0 auto;
+    padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
+  }
+  .brand{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    color:var(--text);
+    text-decoration:none;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 6px 1px rgba(255,182,39,0.6);}
+  .navlinks{display:flex; gap:22px; list-style:none; margin:0; padding:0;}
+  .navlinks a{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-muted); text-decoration:none;
+    padding:4px 0; border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .navlinks a:hover, .navlinks a.active{color:var(--copper); border-color:var(--copper-dim);}
+  .navlinks{overflow-x:auto; scrollbar-width:none;}
+  .navlinks::-webkit-scrollbar{display:none;}
+  @media (max-width:640px){
+    .navlinks{gap:14px;}
+  }
+
+  /* ---------- layout shell ---------- */
+  .board{max-width:calc(var(--content-w) + var(--gutter-w) + 48px); margin:0 auto; padding:0 24px;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:76px 0 54px; position:relative;}
+  .hero-trace{margin-bottom:22px;}
+  .kicker{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--copper); margin:0 0 14px;
+  }
+  h1.name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(2.4rem, 6vw, 3.6rem);
+    line-height:1.04;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .role-line{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:clamp(1.05rem, 2.4vw, 1.3rem);
+    color:var(--text-muted);
+    font-weight:500;
+    margin:0 0 22px;
+  }
+  .thesis{
+    max-width:56ch;
+    color:var(--text-muted);
+    font-size:1.02rem;
+    margin:0 0 30px;
+  }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--amber);
+    border:1px solid rgba(255,182,39,0.4);
+    background:rgba(255,182,39,0.06);
+    border-radius:20px;
+    padding:6px 14px 6px 10px;
+    margin-bottom:34px;
+  }
+  .status-pill .blip{width:6px;height:6px;border-radius:50%;background:var(--amber); animation:blip 1.8s ease-in-out infinite;}
+  @keyframes blip{0%,100%{opacity:1;} 50%{opacity:.25;}}
+
+  .hero-actions{display:flex; flex-wrap:wrap; gap:12px; align-items:center;}
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px; letter-spacing:0.05em; text-transform:uppercase;
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:var(--radius);
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .12s ease, border-color .15s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--copper); color:#0a1511; font-weight:600; border:1px solid var(--copper);}
+  .btn-primary:hover{transform:translateY(-1px); background:#dab35c;}
+  .btn-ghost{color:var(--text); border:1px solid var(--line); }
+  .btn-ghost:hover{border-color:var(--copper-dim); color:var(--copper);}
+
+  .contact-row{
+    display:flex; flex-wrap:wrap; gap:18px; margin-top:28px;
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--text-muted);
+  }
+  .contact-row a{color:var(--text-muted); text-decoration:none; border-bottom:1px solid transparent;}
+  .contact-row a:hover{color:var(--copper); border-color:var(--copper-dim);}
+
+  /* ---------- main / spine ---------- */
+  main{position:relative; padding-left:0;}
+  main .spine{
+    position:absolute; left:14px; top:8px; bottom:8px; width:1px;
+    background:linear-gradient(to bottom, transparent, var(--line-soft) 4%, var(--line-soft) 96%, transparent);
+    display:none;
+  }
+  @media (min-width:760px){
+    main{padding-left:var(--gutter-w);}
+    main .spine{display:block;}
+  }
+
+  .component{
+    position:relative;
+    padding:46px 0;
+    border-top:1px solid var(--line);
+    opacity:0; transform:translateY(14px);
+    animation:rise .6s ease forwards;
+    animation-play-state:paused;
+  }
+  .component.in-view{animation-play-state:running;}
+  @keyframes rise{to{opacity:1; transform:translateY(0);}}
+
+  .component:first-of-type{border-top:1px solid var(--line);}
+
+  .component .via{
+    display:none;
+  }
+  @media (min-width:760px){
+    .component .via{
+      display:block;
+      position:absolute; left:calc(-1 * var(--gutter-w) + 14px); top:52px;
+      width:9px; height:9px; border-radius:50%;
+      background:var(--bg);
+      border:1.5px solid var(--copper-dim);
+    }
+    .component.in-view .via{border-color:var(--copper);}
+  }
+
+  .ref-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:0.1em;
+    color:var(--copper-dim);
+    margin:0 0 8px;
+  }
+  h2.sec-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.5rem; font-weight:600;
+    margin:0 0 22px;
+    color:var(--text);
+  }
+
+  .lede{color:var(--text-muted); max-width:64ch; margin:0 0 8px;}
+
+  /* entries (experience / projects / leadership) */
+  .entry{margin-bottom:30px;}
+  .entry:last-child{margin-bottom:0;}
+  .entry-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    flex-wrap:wrap; gap:6px 16px; margin-bottom:4px;
+  }
+  .entry-title{font-weight:600; font-size:1.02rem; color:var(--text);}
+  .entry-org{color:var(--copper); font-weight:500;}
+  .entry-meta{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--text-dim);
+    white-space:nowrap;
+  }
+  .entry ul{margin:10px 0 0; padding-left:18px; color:var(--text-muted);}
+  .entry li{margin-bottom:6px; padding-left:2px;}
+  .entry li::marker{color:var(--copper-dim);}
+
+  /* education */
+  .edu-meta{font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--text-muted); margin:6px 0 14px;}
+  .coursework{color:var(--text-muted); font-size:0.96rem;}
+  .coursework .label{color:var(--text-dim); font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase; display:block; margin-bottom:6px;}
+
+  /* skills / BOM table */
+  .bom{width:100%; border-collapse:collapse; margin-top:4px;}
+  .bom caption{
+    text-align:left; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    color:var(--text-dim); letter-spacing:0.06em; margin-bottom:14px;
+  }
+  .bom th{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--text-dim); text-align:left; padding:0 0 10px; border-bottom:1px solid var(--line); font-weight:500;
+  }
+  .bom td{padding:14px 14px 14px 0; border-bottom:1px solid var(--line-soft); vertical-align:top;}
+  .bom tr:last-child td{border-bottom:none;}
+  .bom .cat{font-family:'IBM Plex Mono', monospace; font-size:12.5px; color:var(--copper); white-space:nowrap; width:1%;}
+  .bom .items{color:var(--text-muted); font-size:0.95rem;}
+
+  /* footer */
+  footer{
+    border-top:1px solid var(--line);
+    margin-top:20px; padding:40px 0 60px;
+    display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; align-items:center;
+  }
+  footer .foot-links{display:flex; gap:20px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono', monospace; font-size:12px;}
+  footer a{color:var(--text-muted); text-decoration:none;}
+  footer a:hover{color:var(--copper);}
+  footer .fine{color:var(--text-dim); font-family:'IBM Plex Mono', monospace; font-size:11px;}
+
+  @media print{
+    .topnav, .hero-actions, .status-pill{display:none;}
+    body{background:#fff; color:#111;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Section navigation">
+  <div class="topnav-inner">
+    <a class="brand" href="#top"><span class="dot" aria-hidden="true"></span>T. LACY</a>
+    <ul class="navlinks mono" id="navlinks">
+      <li><a href="#summary">Summary</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#leadership">Leadership</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="board" id="top">
+
+  <header class="hero">
+    <svg class="hero-trace" width="120" height="16" viewBox="0 0 120 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="5" fill="#C9A24B"/>
+      <path id="trace-path" d="M13 8 H112" stroke="#C9A24B" stroke-width="1.5" stroke-dasharray="99" stroke-dashoffset="99"/>
+      <circle cx="112" cy="8" r="4" fill="#FFB627"/>
+    </svg>
+    <p class="kicker">Electrical Engineering · Systems Engineering</p>
+    <h1 class="name">Tyler Lacy</h1>
+    <p class="role-line">EE Student — NASA Lunabotics Systems Engineering Lead — U.S. Army Veteran</p>
+    <p class="thesis">I move between hands-on hardware — pressure-testing tools in the field, wiring rover drivetrains on the bench — and the systems engineering discipline (SRR / PDR / CDR) that keeps a multidisciplinary team pointed at the same design. Currently looking for a research-focused engineering internship.</p>
+    <p class="status-pill"><span class="blip" aria-hidden="true"></span>Open to research-focused engineering internships</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="resume.pdf" download>↓ Download résumé (PDF)</a>
+      <a class="btn btn-ghost" href="mailto:tylacy90@my.lonestar.edu">Email me</a>
+      <a class="btn btn-ghost" href="https://github.com/rmrfbot" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn btn-ghost" href="https://linkedin.com/in/tyler-lacy-3b8148312" target="_blank" rel="noopener">LinkedIn ↗</a>
+    </div>
+    <div class="contact-row">
+      <span>Cypress, TX</span>
+      <a href="mailto:tylacy90@my.lonestar.edu">tylacy90@my.lonestar.edu</a>
+      <a href="tel:+12817464637">(281) 746-4637</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="spine" aria-hidden="true"></div>
+
+    <section class="component" id="summary">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">U1 · CORE</p>
+      <h2 class="sec-title">Summary</h2>
+      <p class="lede">Electrical Engineering student, U.S. Army veteran (Secret security clearance), and award-winning NASA Lunabotics systems engineering lead. Combines hands-on electro-mechanical tool reliability, high-pressure fluid testing, and work-order / inventory management experience with C++, Python, and Linux embedded systems development. Proven track record driving campus STEM engagement and leading multidisciplinary teams through systems engineering milestones (PDR / CDR). Seeking a research-focused engineering internship.</p>
+    </section>
+
+    <section class="component" id="experience">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">J1 · INTERFACE</p>
+      <h2 class="sec-title">Professional Experience</h2>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">R&amp;M Technician III</span> — <span class="entry-org">Weatherford International</span></span>
+          <span class="entry-meta">Odessa, TX · 2022–2024</span>
+        </div>
+        <ul>
+          <li>Inspected, redressed O-rings and threads, and hydrostatically pressure-tested high-pressure liner-hanger running tools to ensure zero-defect redeployment.</li>
+          <li>Generated and completed digital work orders, managed staging inventory, and collaborated with rig operators to reduce non-productive time (NPT).</li>
+          <li>Streamlined warehouse parts allocation and improved 5S throughput, building 2–6 fully certified cement heads per day.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Warehouse &amp; IT Manager</span> — <span class="entry-org">Bass Tool &amp; Supply</span></span>
+          <span class="entry-meta">Houston, TX · 2020–2022</span>
+        </div>
+        <ul>
+          <li>Managed inventory receiving and fulfillment across 300,000+ SKUs while leading a 10-person logistics team.</li>
+          <li>Maintained hardware infrastructure, deploying Windows/macOS workstations and executing secure profile migrations.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="component" id="projects">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">Q1 · ACTIVE</p>
+      <h2 class="sec-title">Research &amp; Engineering Projects</h2>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Systems Engineering Team Lead</span> — <span class="entry-org">NASA Lunabotics Rover</span></span>
+          <span class="entry-meta">2025 – Present</span>
+        </div>
+        <ul>
+          <li>Led an award-winning multidisciplinary engineering team through NASA Systems Requirement Review (SRR) and Preliminary / Critical Design Reviews (PDR/CDR) for an autonomous regolith excavator.</li>
+          <li>Engineered 4-motor drivetrain integration and sensor power distribution using microcontrollers, relay buses, and 2D LiDAR navigation sensors.</li>
+          <li>Formulated risk mitigation matrices, budget allocations ($1,000+), and physical integration testing protocols.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Project Lead</span> — <span class="entry-org">Campus ESP32 Solar / HVAC Optimization Mesh</span></span>
+          <span class="entry-meta">In progress</span>
+        </div>
+        <ul>
+          <li>Architected a 10-node off-grid LoRa/ESP32 mesh network across campus to correlate outdoor solar radiation with indoor HVAC electrical draw.</li>
+          <li>Programmed low-power C++ firmware with dynamic multi-hop routing, sensor polling, and automated data transmission to an edge gateway to pinpoint campus energy waste.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Fluid System Pressure Testing &amp; Tool Reliability</span> — <span class="entry-org">Weatherford International / Independent</span></span>
+          <span class="entry-meta">2022–2024</span>
+        </div>
+        <ul>
+          <li>Executed hydrostatic pressure testing protocols up to rated limits on high-pressure fluid tools, ensuring leak-free seal integrity prior to field deployment.</li>
+          <li>Logged equipment maintenance, part teardowns, and certification records via digital work order systems; tracked staging inventory across product lines.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Autonomous Drive Developer</span> — <span class="entry-org">VEX U Robotics Platform</span></span>
+          <span class="entry-meta">2025</span>
+        </div>
+        <ul>
+          <li>Developed modular C++ drivetrain control algorithms for a 6-wheel tank-style robot chassis.</li>
+          <li>Programmed precise 15-second autonomous routines and tuned PID velocity response curves for driver control under match constraints.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="component" id="leadership">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">SW1 · CONTROL</p>
+      <h2 class="sec-title">Leadership &amp; Military Service</h2>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">25U Signal Support Systems Specialist</span> — <span class="entry-org">U.S. Army National Guard</span></span>
+          <span class="entry-meta">Active Secret clearance</span>
+        </div>
+        <ul>
+          <li>Operated, deployed, and maintained tactical communications networks, radio systems, wire/fiber networks, and secure encryption hardware.</li>
+          <li>Awarded the National Defense Service Medal and Army Service Ribbon.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Event Manager &amp; Lead</span> — <span class="entry-org">ASME Chapter, Lone Star College</span></span>
+          <span class="entry-meta">2025 – Present</span>
+        </div>
+        <ul>
+          <li>Manage chapter build budgets, organize campus outreach events, and co-lead Lunabotics robotics initiatives to expand student participation in engineering.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Historian</span> — <span class="entry-org">Computer Science Club, Lone Star College</span></span>
+          <span class="entry-meta">2025 – Present</span>
+        </div>
+        <ul>
+          <li>Enhanced LSC–CyFair STEM engagement by organizing hands-on technical workshops, maintaining public code archives, and documenting club engineering initiatives.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="component" id="education">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">Y1 · TIMING</p>
+      <h2 class="sec-title">Education</h2>
+      <div class="entry">
+        <div class="entry-head">
+          <span><span class="entry-title">Associate of Science, Engineering Track</span> — <span class="entry-org">Lone Star College</span></span>
+          <span class="entry-meta">Expected Spring 2027</span>
+        </div>
+        <p class="edu-meta">Honors College · 4.0 GPA — straight A's across 4 consecutive full-time semesters, 2024–2026</p>
+        <p class="coursework"><span class="label">Relevant coursework</span>Programming Fundamentals I &amp; II (C++), General Chemistry I, University Physics I, Calculus II, Macroeconomics</p>
+      </div>
+    </section>
+
+    <section class="component" id="skills">
+      <span class="via" aria-hidden="true"></span>
+      <p class="ref-tag">BOM · REV A</p>
+      <h2 class="sec-title">Technical Skills</h2>
+      <table class="bom">
+        <caption>Bill of materials — categories and components</caption>
+        <thead>
+          <tr><th scope="col">Category</th><th scope="col">Components</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cat">Programming &amp; Systems</td>
+            <td class="items">C++, Python, Linux (Ubuntu/Pop!_OS), Git/GitHub, ROS 2, Bash, Embedded C</td>
+          </tr>
+          <tr>
+            <td class="cat">Hardware &amp; Electronics</td>
+            <td class="items">ESP32, LoRa (915 MHz), Raspberry Pi, Jetson Orin Nano, Arduino/Teensy, LiDAR, I2C/SPI/UART protocols</td>
+          </tr>
+          <tr>
+            <td class="cat">Design &amp; Prototyping</td>
+            <td class="items">Autodesk Fusion 360 (CAD/CAM), OnShape, 3D printing (FDM/PLA+/PETG-CF), manual/CNC machine operation, calipers, micrometers, GD&amp;T basics</td>
+          </tr>
+          <tr>
+            <td class="cat">Testing &amp; QA</td>
+            <td class="items">Hydrostatic &amp; pneumatic pressure testing, seal/thread redress, work order tracking (ERP/SAP), 5S, lean QA/QC</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div>
+      <div class="foot-links">
+        <a href="mailto:tylacy90@my.lonestar.edu">tylacy90@my.lonestar.edu</a>
+        <a href="tel:+12817464637">(281) 746-4637</a>
+        <a href="https://github.com/rmrfbot" target="_blank" rel="noopener">github.com/rmrfbot</a>
+        <a href="https://linkedin.com/in/tyler-lacy-3b8148312" target="_blank" rel="noopener">linkedin.com/in/tyler-lacy-3b8148312</a>
+        <a href="resume.pdf" download>résumé.pdf</a>
+      </div>
+      <p class="fine" style="margin-top:14px;">Cypress, TX · Built by Tyler Lacy</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // trace draw-in on load
+  window.addEventListener('DOMContentLoaded', () => {
+    const p = document.getElementById('trace-path');
+    if (p) requestAnimationFrame(() => { p.style.transition = 'stroke-dashoffset 1s ease'; p.style.strokeDashoffset = '0'; });
+  });
+
+  // reveal sections on scroll + scroll-spy nav
+  const sections = document.querySelectorAll('.component');
+  const navLinks = document.querySelectorAll('.navlinks a');
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+  }, { threshold: 0.12 });
+  sections.forEach(s => revealObserver.observe(s));
+
+  const spyObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px' });
+  sections.forEach(s => spyObserver.observe(s));
+</script>
+
+</body>
+</html>
